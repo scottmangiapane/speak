@@ -1,6 +1,5 @@
 const { spawn } = require('child_process');
 require('dotenv').config();
-require('express-async-errors');
 
 const express = require('express');
 const helmet = require('helmet');
@@ -15,21 +14,16 @@ const { blocker, punisher } = new RateLimiter({
 
 const basePath = `/${ process.env.BASE_PATH || '' }`.replace(/\/+/g, '/');
 const port = process.env.PORT || 3000;
+const queue = [];
 
-const app = express();
 const router = express.Router();
 
-app.use(helmet());
-
-app.set('trust proxy', true);
-
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
-app.use(logger('dev'));
-
-router.use(blocker, punisher);
-
 router.post('/speak', (req, res) => {
+    if ((new Date()).getHours() < 10) {
+        return res.status(503).json({
+            errors: [ 'Shhhh! Right now is quiet hours. Try again after 10am MST.' ]
+        });
+    }
     const message = req.body.message;
     if (message.length < 1 || message.length > 100) {
         return res.status(422).json({
@@ -41,16 +35,21 @@ router.post('/speak', (req, res) => {
             errors: [ 'Message can only contain letters and spaces.' ]
         });
     }
-    if ((new Date()).getHours() < 10) {
-        return res.status(503).json({
-            errors: [ 'Shhhh! Right now is quiet hours. Try again after 10am MST.' ]
-        });
-    }
     console.log(`${ req.ip }:  ${ message }`);
-    spawn('sh', ['-c', `espeak "${ message }" --stdout | aplay ${ process.env.APLAY_ARGS }`]);
+    queue.push(message);
     return res.status(204).json({});
 });
 
+const app = express();
+app.set('trust proxy', true);
+
+app.use(helmet());
+
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(logger('dev'));
+
+app.use(blocker, punisher);
 app.use(basePath, router);
 
 app.use((req, res) => {
@@ -63,3 +62,17 @@ app.use((err, req, res, next) => {
 });
 
 app.listen(port, () => console.log(`Server listening on ${ basePath }:${ port }...`));
+
+let blocked = false;
+setInterval(() => {
+    if (!blocked) {
+    const message = queue.shift();
+        if (!!message) {
+            blocked = true;
+            const ps = spawn('sh', ['-c', `espeak "${ message }" --stdout | aplay ${ process.env.APLAY_ARGS }`]);
+            ps.on('exit', () => {
+                blocked = false;
+            });
+        }
+    }
+}, 100);
