@@ -8,8 +8,8 @@ const logger = require('morgan');
 const RateLimiter = require('./utils/rate-limiter');
 const { blocker, punisher } = new RateLimiter({
     keyPrefix: 'speak',
-    maxTokens: 20,
-    seconds: 60 * 60
+    maxTokens: 50,
+    seconds: 60 * 60 * 24
 });
 
 const basePath = `/${ process.env.BASE_PATH || '' }`.replace(/\/+/g, '/');
