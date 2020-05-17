@@ -30,7 +30,7 @@ module.exports = class RateLimiter {
         const key = this._key(req.ip);
         const value = await this._currentValue(key);
         if (value.tokens === 0) {
-            return res.status(429).json({ errors: [{ msg: 'Too many requests' }] });
+            return res.status(429).json({ errors: [ 'Too many requests. Try again later.' ] });
         }
         next();
     };
