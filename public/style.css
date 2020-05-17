@@ -1,0 +1,135 @@
+a,a:active,a:focus,a:hover,a:visited {
+	text-decoration: none
+}
+
+a,body,button,div,form,h1,h2,h3,h4,h5,h6,html,input,li,p {
+	margin: 0;
+	padding: 0
+}
+
+a,button,h1,h2,h3,h4,h5,h6,input,label,li,p {
+	-moz-osx-font-smoothing: grayscale;
+	-webkit-font-smoothing: antialiased;
+	color: inherit;
+	font-family: Roboto,sans-serif;
+	line-height: 1.5em;
+	font-weight: 400
+}
+
+a,button,input,label,li,p {
+	font-size: 1em
+}
+
+h1,h2,h3,h4,h5,h6 {
+	font-weight: 500
+}
+
+p {
+	color: #727272
+}
+
+body {
+	background-color: #fff
+}
+
+button {
+	background-color: transparent;
+	border: none;
+	outline: none
+}
+
+input[type=text] {
+	-moz-appearance: none;
+	-webkit-appearance: none;
+	background-color: #fff;
+	border: none;
+	box-shadow: inset 0 0 0 2px #e0e0e0;
+	border-radius: 5px;
+	outline: none;
+	padding: 8px;
+	width: 100%
+}
+
+input[type=text]:focus {
+	box-shadow: inset 0 0 0 2px #2196f3
+}
+
+input[type=submit] {
+	border: none
+}
+
+.btn {
+	background-color: #2196f3;
+	border-radius: 5px;
+	color: #fff;
+	cursor: pointer;
+	display: inline-block;
+	font-weight: 500;
+	padding: 8px
+}
+
+.btn:active,.btn:active:focus {
+	background-color: #64b5f6
+}
+
+.btn:disabled,.btn:disabled:hover {
+	background-color: #b0bec5;
+	cursor: not-allowed
+}
+
+.btn:hover {
+	background-color: #42a5f5
+}
+
+.card {
+	background-color: #fff;
+	border-radius: 8px;
+	box-shadow: 0 8px 24px 0 rgba(0,0,0,.2);
+	display: inline-block;
+	max-width: 400px;
+	padding: 32px;
+	text-align: left;
+	width: 100%
+}
+
+.card-title {
+	background-color: #263238;
+	border-radius: 8px 8px 0 0;
+	color: #fff;
+	margin: -32px -32px 32px -32px;
+	padding: 32px;
+	text-align: center
+}
+
+.center {
+	align-items: center;
+	display: flex;
+	justify-content: center
+}
+
+.spacer {
+	margin-top: 16px
+}
+
+.text-center {
+	text-align: center
+}
+
+.text-error {
+	color: #d32f2f
+}
+
+.text-small {
+	font-size: .8em
+}
+
+.text-success {
+	color: #388e3c
+}
+
+@media only screen and (max-width: 512px) {
+	.card {
+		box-shadow:0 0 8px 0 rgba(0,0,0,.2)
+	}
+}
+
