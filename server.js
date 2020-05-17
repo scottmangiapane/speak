@@ -10,8 +10,8 @@ const logger = require('morgan');
 const RateLimiter = require('./utils/rate-limiter');
 const { blocker, punisher } = new RateLimiter({
     prefix: 'rl_espeak',
-    maxTokens: 10,
-    seconds: 60 * 60 * 24
+    maxTokens: 20,
+    seconds: 60 * 60
 });
 
 const basePath = `/${ process.env.BASE_PATH || '' }`.replace(/\/+/g, '/');
@@ -33,8 +33,8 @@ router.use(blocker, punisher);
 router.post('/speak', [
     check('message', 'Message can only contain letters and spaces')
         .isWhitelisted('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ '),
-    check('message', 'Message must be between 1 and 50 characters')
-        .isLength({ min: 1, max: 50 }),
+    check('message', 'Message must be between 1 and 100 characters')
+        .isLength({ min: 1, max: 100 }),
 ], (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
