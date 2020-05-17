@@ -1,3 +1,4 @@
+const { spawn } = require('child_process');
 require('dotenv').config();
 require('express-async-errors');
 const { check, validationResult } = require('express-validator');
@@ -30,7 +31,10 @@ app.use(logger('dev'));
 router.use(blocker, punisher);
 
 router.post('/speak', [
-    check('message', 'Message must be between 1 and 40 characters').isLength({ min: 1, max: 40 }),
+    check('message', 'Message can only contain letters and spaces')
+        .isWhitelisted('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ '),
+    check('message', 'Message must be between 1 and 50 characters')
+        .isLength({ min: 1, max: 50 }),
 ], (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -38,7 +42,8 @@ router.post('/speak', [
     }
     return next();
 }, (req, res) => {
-    return res.json({ status: 'sucess' });
+    spawn('sh', ['-c', `espeak "${ req.body.message }" --stdout | aplay ${ process.env.APLAY_ARGS }`]);
+    return res.status(204).json({});
 });
 
 app.use(basePath, router);
