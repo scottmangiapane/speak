@@ -42,6 +42,7 @@ router.post('/speak', [
     }
     return next();
 }, (req, res) => {
+    console.log(`${ req.ip }:  ${ req.body.message }`);
     spawn('sh', ['-c', `espeak "${ req.body.message }" --stdout | aplay ${ process.env.APLAY_ARGS }`]);
     return res.status(204).json({});
 });
