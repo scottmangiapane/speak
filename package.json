@@ -1,0 +1,25 @@
+{
+    "name": "espeak-api",
+    "version": "1.0.0",
+    "author": "Scott Mangiapane",
+    "license": "GPL-3.0",
+    "private": true,
+    "scripts": {
+        "start": "node ./server.js",
+        "start:watch": "nodemon -e js,json,yaml 'node ./server.js'",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "dependencies": {
+        "connect-redis": "^4.0.4",
+        "dotenv": "^8.2.0",
+        "express": "^4.17.1",
+        "express-async-errors": "^3.1.1",
+        "express-validator": "^6.4.0",
+        "helmet": "^3.21.3",
+        "morgan": "^1.9.1",
+        "redis": "^3.0.2"
+    },
+    "devDependencies": {
+        "nodemon": "^2.0.2"
+    }
+}
