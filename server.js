@@ -1,9 +1,10 @@
 const { spawn } = require('child_process');
-require('dotenv').config();
-
 const express = require('express');
 const helmet = require('helmet');
 const logger = require('morgan');
+const publicIp = require('public-ip');
+
+require('dotenv').config();
 
 const RateLimiter = require('./utils/rate-limiter');
 const { blocker, punisher } = new RateLimiter({
@@ -15,6 +16,9 @@ const { blocker, punisher } = new RateLimiter({
 const basePath = `/${ process.env.BASE_PATH || '' }`.replace(/\/+/g, '/');
 const port = process.env.PORT || 3000;
 const queue = [];
+
+let serverIp;
+(async () => { serverIp = await publicIp.v4(); })();
 
 const router = express.Router();
 
@@ -35,7 +39,9 @@ router.post('/speak', (req, res) => {
             errors: [ 'Message can only contain letters and spaces.' ]
         });
     }
-    console.log(`${ req.ip }:  ${ message }`);
+    if (req.ip !== serverIp) {
+        console.log(`${ req.ip }:  ${ message }`);
+    }
     queue.push(message);
     return res.status(204).json({});
 });
@@ -69,7 +75,10 @@ setInterval(() => {
     const message = queue.shift();
         if (!!message) {
             blocked = true;
-            const ps = spawn('sh', ['-c', `espeak "${ message }" --stdout | aplay ${ process.env.APLAY_ARGS }`]);
+            const ps = spawn('sh', [
+                '-c',
+                `espeak "${ message }" --stdout | aplay ${ process.env.APLAY_ARGS }`
+            ]);
             ps.on('exit', () => {
                 blocked = false;
             });
