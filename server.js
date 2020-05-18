@@ -1,10 +1,11 @@
+require('dotenv').config();
+require('express-async-errors');
+
 const { spawn } = require('child_process');
 const express = require('express');
 const helmet = require('helmet');
 const logger = require('morgan');
 const publicIp = require('public-ip');
-
-require('dotenv').config();
 
 const RateLimiter = require('./utils/rate-limiter');
 const { blocker, punisher } = new RateLimiter({
@@ -19,6 +20,7 @@ const queue = [];
 
 let serverIp;
 (async () => { serverIp = await publicIp.v4(); })();
+const isExternal = (req) => req.ip !== serverIp;
 
 const app = express();
 app.set('trust proxy', true);
@@ -33,11 +35,6 @@ app.use(logger('dev'));
 app.use(blocker, punisher);
 
 app.post('/api', (req, res) => {
-	if ((new Date()).getHours() < 10) {
-		return res.status(503).json({
-			errors: [ 'Shhhh! Right now is quiet hours. Try again after 10am MST.' ]
-		});
-	}
 	const message = req.body.message;
 	if (message.length < 1 || message.length > 100) {
 		return res.status(422).json({
@@ -49,7 +46,12 @@ app.post('/api', (req, res) => {
 			errors: [ 'Message can only contain letters and spaces.' ]
 		});
 	}
-	if (req.ip !== serverIp) {
+	if (isExternal(req)) {
+		if ((new Date()).getHours() < 10) {
+			return res.status(503).json({
+				errors: [ 'Shhhh! Right now is quiet hours. Try again after 10am MST.' ]
+			});
+		}
 		console.log(`${ (new Date()).toTimeString() } | ${ req.ip } | ${ message }`);
 	}
 	queue.push(message);
@@ -70,12 +72,12 @@ app.listen(port, () => console.log(`Server listening on ${ basePath }:${ port }.
 let blocked = false;
 setInterval(() => {
 	if (!blocked) {
-	const message = queue.shift();
+		const message = queue.shift();
 		if (!!message) {
 			blocked = true;
 			const ps = spawn('sh', [
 				'-c',
-				`espeak "${ message }" --stdout | aplay ${ process.env.APLAY_ARGS }`
+				`pico2wave -w ./stdout.wav "${ message }" | aplay ${ process.env.APLAY_ARGS }`
 			]);
 			ps.on('exit', () => {
 				blocked = false;
