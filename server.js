@@ -50,7 +50,7 @@ app.post('/api', (req, res) => {
 		});
 	}
 	if (req.ip !== serverIp) {
-		console.log(`${ req.ip }: ${ message }`);
+		console.log(`${ (new Date()).toTimeString() } | ${ req.ip } | ${ message }`);
 	}
 	queue.push(message);
 	return res.status(204).json({});
