@@ -18,9 +18,18 @@ const basePath = `/${ process.env.BASE_PATH || '' }`.replace(/\/+/g, '/');
 const port = process.env.PORT || 3000;
 const queue = [];
 
-let serverIp;
-(async () => { serverIp = await publicIp.v4(); })();
-const isExternal = (req) => req.ip !== serverIp;
+const addresses = [];
+(async () => {
+	const ipv4 = await publicIp.v4();
+	const ipv6 = await publicIp.v6();
+	if (!!ipv4) {
+		addresses.push(ipv4);
+	}
+	if (!!ipv6) {
+		addresses.push(ipv6);
+	}
+})();
+const isExternal = (req) => addresses.includes(req.ip);
 
 const app = express();
 app.set('trust proxy', true);
@@ -36,7 +45,7 @@ app.use(blocker, punisher);
 
 app.post('/api', (req, res) => {
 	const message = req.body.message;
-	if (message.length < 1 || message.length > 100) {
+	if (!message || message.length < 1 || message.length > 100) {
 		return res.status(422).json({
 			errors: [ 'Message must be between 1 and 100 characters.' ]
 		});

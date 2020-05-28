@@ -14,7 +14,7 @@ form.onsubmit = (e) => {
 	speak.disabled = true;
 	const req = new XMLHttpRequest();
 	req.open('POST', '/api', true);
-	req.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+	req.setRequestHeader('Content-type', 'application/json');
 	req.onload = () => {
 		const res = JSON.parse(req.responseText || '{}');
 		if (!!res.errors) {
@@ -27,5 +27,5 @@ form.onsubmit = (e) => {
 		}
 		speak.disabled = false;
 	}
-	req.send(`message=${ input.value }`);
+	req.send(JSON.stringify({ message: input.value }));
 };
